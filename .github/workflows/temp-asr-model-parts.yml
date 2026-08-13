@@ -1,0 +1,76 @@
+name: Temporary ASR model parts
+
+on:
+  push:
+    branches:
+      - temp/asr-model-cache-20260813
+    paths:
+      - .github/workflows/temp-asr-model-parts.yml
+
+permissions:
+  contents: read
+
+jobs:
+  medium-parts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Download and split Whisper medium multilingual Q5_0
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 8 --retry-delay 5 --retry-all-errors \
+            -o ggml-medium-q5_0.bin \
+            'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium-q5_0.bin?download=true'
+          echo '19fea4b380c3a618ec4723c3eef2eb785ffba0d0538cf43f8f235e7b3b34220f  ggml-medium-q5_0.bin' | sha256sum -c -
+          split -b 240M -d -a 2 ggml-medium-q5_0.bin medium-part-
+          ls -lh medium-part-*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-medium-part-00
+          path: medium-part-00
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-medium-part-01
+          path: medium-part-01
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-medium-part-02
+          path: medium-part-02
+          compression-level: 0
+          retention-days: 1
+
+  turbo-parts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Download and split Whisper large-v3-turbo multilingual Q5_0
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 8 --retry-delay 5 --retry-all-errors \
+            -o ggml-large-v3-turbo-q5_0.bin \
+            'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin?download=true'
+          echo '394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2  ggml-large-v3-turbo-q5_0.bin' | sha256sum -c -
+          split -b 240M -d -a 2 ggml-large-v3-turbo-q5_0.bin turbo-part-
+          ls -lh turbo-part-*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-turbo-part-00
+          path: turbo-part-00
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-turbo-part-01
+          path: turbo-part-01
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-turbo-part-02
+          path: turbo-part-02
+          compression-level: 0
+          retention-days: 1
